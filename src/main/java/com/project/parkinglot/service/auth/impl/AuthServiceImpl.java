@@ -47,24 +47,25 @@ public class AuthServiceImpl implements AuthService {
      * @return the generated user ID
      */
     @Override
-    public String register(SignupRequest request) {
+   public String register(SignupRequest request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException(request.getEmail());
-        }
-
-        UserEntity userEntity = UserEntity.builder()
-                .email(request.getEmail())
-                .fullName(request.getFullName())
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-
-        userRepository.save(userEntity);
-
-        return "Success";
+    if (userRepository.existsByEmail(request.getEmail())) {
+        throw new EmailAlreadyExistsException(request.getEmail());
     }
+
+    UserEntity userEntity = UserEntity.builder()
+            .email(request.getEmail())
+            .fullName(request.getFullName())
+            .username(request.getUsername())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .role(request.getRole())
+            .build();
+
+    UserEntity savedUser = userRepository.save(userEntity);
+
+    return "Success, UserId: " + savedUser.getId();
+}
+
 
     /**
      * Authenticates a user.
@@ -73,24 +74,25 @@ public class AuthServiceImpl implements AuthService {
      * @return the JWT response
      */
     @Override
-    public JWTResponse login(LoginRequest request) {
+   public JWTResponse login(LoginRequest request) {
 
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+    UsernamePasswordAuthenticationToken authToken =
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        Authentication auth = authenticationManager.authenticate(authToken);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        String jwtToken = jwtUtils.generateJwtToken(auth);
+    Authentication auth = authenticationManager.authenticate(authToken);
+    SecurityContextHolder.getContext().setAuthentication(auth);
+    String jwtToken = jwtUtils.generateJwtToken(auth);
 
-        UserEntity userEntity = userRepository.findByEmail(request.getEmail()).orElseThrow(UserNotFoundException::new);
-
-        return JWTResponse.builder()
-                .email(request.getEmail())
-                .token(jwtToken)
-                .refreshToken(refreshTokenService.createRefreshToken(userEntity))
-                .build();
-    }
-
+    UserEntity userEntity = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(UserNotFoundException::new);
+  
+            return JWTResponse.builder()
+            .id(userEntity.getId()) // <-- include here 
+            .email(request.getEmail())
+            .token(jwtToken)
+            .refreshToken(refreshTokenService.createRefreshToken(userEntity))
+            .build();
+}
     /**
      * Refreshes the JWT token.
      *

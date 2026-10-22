@@ -19,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+
 @Table(name = "VEHICLE")
 public class VehicleEntity extends BaseEntity {
 

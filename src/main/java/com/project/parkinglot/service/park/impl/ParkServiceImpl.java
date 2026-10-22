@@ -132,7 +132,7 @@ public class ParkServiceImpl implements ParkService {
      */
     @Override
     public Integer countCurrentParks(ParkingAreaEntity parkingAreaEntity) {
-        return parkRepository.countByParkingAreaEntityAndParkStatus(parkingAreaEntity, ParkStatus.EMPTY);
+        return parkRepository.countByParkingAreaEntityAndParkStatus(parkingAreaEntity, ParkStatus.FULL);
     }
 
     /**

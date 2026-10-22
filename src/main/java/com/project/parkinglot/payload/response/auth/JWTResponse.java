@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JWTResponse {
-
+    private String id;
     private String token;
 
     @Builder.Default

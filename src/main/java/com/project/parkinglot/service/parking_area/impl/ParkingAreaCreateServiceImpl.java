@@ -38,30 +38,32 @@ class ParkingAreaCreateServiceImpl implements ParkingAreaCreateService {
      * @param parkingAreaCreateRequest the request containing details for creating the parking area
      * @return the created parking area
      */
-    @Override
-    public ParkingArea createParkingArea(
-            final ParkingAreaCreateRequest parkingAreaCreateRequest
-    ) {
-        this.checkParkingAreaNameAndLocationUniqueness(
-                parkingAreaCreateRequest.getName(),
-                parkingAreaCreateRequest.getLocation()
-        );
+   @Override
+public ParkingArea createParkingArea(
+        final ParkingAreaCreateRequest parkingAreaCreateRequest
+) {
+    this.checkParkingAreaNameAndLocationUniqueness(
+            parkingAreaCreateRequest.getName(),
+            parkingAreaCreateRequest.getLocation()
+    );
 
-        ParkingAreaEntity parkingAreaToBeCreate = parkingAreaCreateRequestToParkingAreaEntityMapper
-                .map(parkingAreaCreateRequest);
+    ParkingAreaEntity parkingAreaEntity = parkingAreaCreateRequestToParkingAreaEntityMapper
+            .map(parkingAreaCreateRequest);
 
-        parkingAreaRepository.save(parkingAreaToBeCreate);
+    // Save first so ID is generated
+    ParkingAreaEntity savedParkingArea = parkingAreaRepository.save(parkingAreaEntity);
 
-        if (Objects.nonNull(parkingAreaCreateRequest.getPriceListRequest())) {
-            final PriceList createdPriceListForParkingArea = priceListCreateService
-                    .createPriceList(parkingAreaCreateRequest.getPriceListRequest());
+    if (Objects.nonNull(parkingAreaCreateRequest.getPriceListRequest())) {
+        final PriceList createdPriceListForParkingArea = priceListCreateService
+                .createPriceList(parkingAreaCreateRequest.getPriceListRequest());
 
-            parkingAreaToBeCreate.setPriceListEntity(PriceListMapper.toEntity(createdPriceListForParkingArea));
-        }
-
-        return parkingAreaEntityToParkingAreaMapper
-                .map(parkingAreaToBeCreate);
+        savedParkingArea.setPriceListEntity(PriceListMapper.toEntity(createdPriceListForParkingArea));
     }
+
+    // Map from saved entity (which now has ID)
+    return parkingAreaEntityToParkingAreaMapper.map(savedParkingArea);
+}
+
 
     /**
      * Checks if a parking area with the given name and location already exists.
